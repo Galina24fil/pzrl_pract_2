@@ -18,11 +18,6 @@ size_t HashTable::hash_function(const KeyType &key) const
     return hash;
 }
 
-double HashTable::getLoadFactor() 
-{
-    return static_cast<double>(_filled) / _capacity;
-}
-
 void HashTable::insert(const KeyType &key, const ValueType &value) {
     if (getLoadFactor() > 0.75) 
     {
@@ -43,27 +38,27 @@ void HashTable::insert(const KeyType &key, const ValueType &value) {
         }
     }
     
-    size_t index = hash_function(key);
-    for (auto &pair : table[index]) 
+    size_t ind = hash_function(key);
+    for (auto it = table[ind].begin(); it != table[ind].end(); ++it) 
     {
-        if (pair.first == key) 
+        if (it->first == key) 
         {
-            pair.second = value;
+            it->second = value;
 	        return;
         }
     }
-    table[index].push_back({key, value});
+    table[ind].push_back({key, value});
     _filled++;
 }
 
 bool HashTable::find(const KeyType &key, ValueType &value) const
 {
     size_t ind = hash_function(key);
-    for (const auto &pair : table[ind]) 
+    for (auto it = table[ind].begin(); it != table[ind].end(); ++it) 
     {
-        if (pair.first == key) 
+        if (it->first == key) 
         {
-            value = pair.second;
+            value = it->second;
             return true;
         }
     }
@@ -72,12 +67,12 @@ bool HashTable::find(const KeyType &key, ValueType &value) const
 
 void HashTable::remove(const KeyType &key) 
 {
-    size_t index = hash_function(key);
-    for (auto it = table[index].begin(); it != table[index].end(); it++) 
+    size_t ind = hash_function(key);
+    for (auto it = table[ind].begin(); it != table[ind].end(); it++) 
     {
         if (it->first == key) 
         {
-            table[index].erase(it);
+            table[ind].erase(it);
             _filled--;
             return;
         }
@@ -87,12 +82,17 @@ void HashTable::remove(const KeyType &key)
 ValueType& HashTable::operator[](const KeyType &key) 
 {
     size_t ind = hash_function(key);
-    for (auto &pair : table[ind]) 
+    for (auto it = table[ind].begin(); it != table[ind].end(); it++) 
     {
-        if (pair.first == key) 
+        if (it->first == key) 
         {
-            return pair.second;
+            return it->second;
         }
     }
     throw std::runtime_error("There is no this element");
+}
+
+double HashTable::getLoadFactor() 
+{
+    return static_cast<double>(_filled) / _capacity;
 }
